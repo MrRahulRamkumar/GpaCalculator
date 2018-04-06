@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "554184344893",
+    "firebase_url": "https://gpacalculator-f3b80.firebaseio.com",
+    "project_id": "gpacalculator-f3b80",
+    "storage_bucket": "gpacalculator-f3b80.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554184344893:android:a01686330b7ab741",
+        "android_client_info": {
+          "package_name": "rahulramkumar.com.gpacalculator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "554184344893-576cm6f01mm19q58n99l4o53qnv6v08c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "rahulramkumar.com.gpacalculator",
+            "certificate_hash": "9d5cd7f312ac41fc5b7480c3b8ad766fe8246299"
+          }
+        },
+        {
+          "client_id": "554184344893-jkj2fru2ms3agf586ofooi1h35077c38.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6C4-aA0bcvP_urzFzE7djZZonVGmjiB8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "554184344893-jkj2fru2ms3agf586ofooi1h35077c38.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Vit AP GPA Calculator</string>
+    <string name="enter_course">Enter Course...</string>
+    <string name="grade">Grade...</string>
+    <string name="course">Course</string>
+    <string name="about">About</string>
+
+    <string-array name="grade_letters">
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+        <item>E</item>
+        <item>F</item>
+    </string-array>
+
+</resources>
