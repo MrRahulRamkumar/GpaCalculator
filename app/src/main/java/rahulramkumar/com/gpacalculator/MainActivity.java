@@ -1,13 +1,12 @@
 package rahulramkumar.com.gpacalculator;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -18,12 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.ListView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -39,37 +34,30 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import android.app.AlertDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static boolean calculatePressed = false;
-
     private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
     private DatabaseReference mRootRef;
 
-    private List<String> courses;
+    private List<String> mCourses;
     private String[] gradeLetters = {"-","S","A","B","C","D","E"};
-    private HashMap<String, Long> courseDetails;
-    private HashMap<String, String> gradeValues;
-
-    private Toolbar toolbar;
-    private RecyclerView recyclerView;
-    private RecyclerAdapter recyclerAdapter;
-    private Button calculateButton;
-    private FloatingActionButton addButton;
-    private TextView gpaText,courseText,gradeText;
-    private ProgressBar progressBar;
+    private HashMap<String, Long> mCourseDetails;
+    private HashMap<String, String> mGradeValues;
+    RecyclerAdapter mRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Vit AP GPA Calculator");
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUser = mAuth.getCurrentUser();
@@ -90,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        courseDetails = new HashMap<>();
+        mCourseDetails = new HashMap<>();
         mRootRef.child("course_details").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                courseDetails = (HashMap<String, Long>) dataSnapshot.getValue();
-                initLayout();
+                mCourseDetails = (HashMap<String, Long>) dataSnapshot.getValue();
+                initLayout(7);
             }
 
             @Override
@@ -104,47 +92,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        gradeValues = new HashMap<>();
-        gradeValues.put("S", "10");
-        gradeValues.put("A", "9");
-        gradeValues.put("B", "8");
-        gradeValues.put("C", "7");
-        gradeValues.put("D", "6");
-        gradeValues.put("E", "5");
-
-        courseText = findViewById(R.id.course_text);
-        courseText.setVisibility(View.INVISIBLE);
-        gradeText = findViewById(R.id.grade_text);
-        gradeText.setVisibility(View.INVISIBLE);
-        gpaText = findViewById(R.id.gpa_text);
-        gpaText.setVisibility(View.INVISIBLE);
-        calculateButton = findViewById(R.id.calculate_button);
-        addButton = findViewById(R.id.add_button);
-        addButton.setVisibility(View.INVISIBLE);
-        calculateButton.setVisibility(View.INVISIBLE);
-        progressBar = findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        toolbar = findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Vit AP GPA Calculator");
-
-        calculateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                calculatePressed = true;
-                calculateGPA();
-                hideKeyBoard();
-            }
-        });
-
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                recyclerAdapter.addItem();
-                recyclerAdapter.notifyDataSetChanged();
-            }
-        });
+        mGradeValues = new HashMap<>();
+        mGradeValues .put("S", "10");
+        mGradeValues .put("A", "9");
+        mGradeValues .put("B", "8");
+        mGradeValues .put("C", "7");
+        mGradeValues .put("D", "6");
+        mGradeValues .put("E", "5");
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -160,92 +114,71 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this,AboutActivity.class);
             startActivity(intent);
         }
+        else if(item.getItemId() == R.id.action_calculate) {
+            calculateGPA();
+            hideKeyBoard();
+        }
+        else if (item.getItemId() == R.id.action_select_number_of_rows) {
+            showInputNumberOfRowsDialog();
+        }
         return true;
     }
 
-    private void initLayout() {
-        courses = new ArrayList<>(courseDetails.keySet());
+    private void initLayout(int itemCount) {
+        mCourses = new ArrayList<>(mCourseDetails.keySet());
 
-        ArrayAdapter<String> coursesAdapter = new ArrayAdapter<String>(this, R.layout.dropdown, courses);
-        ArrayAdapter<String> gradeLettersAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, gradeLetters);
+        ArrayAdapter<String> coursesAdapter = new ArrayAdapter<String>(this, R.layout.auto_complete_text_view_dropdown, mCourses);
+        ArrayAdapter<String> gradeLettersAdapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown, gradeLetters);
 
-        recyclerView = findViewById(R.id.recycler_view);
-        recyclerAdapter = new RecyclerAdapter(coursesAdapter,gradeLettersAdapter);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerView.setItemViewCacheSize(20);
 
-        gpaText.setVisibility(View.VISIBLE);
-        calculateButton.setVisibility(View.VISIBLE);
-        addButton.setVisibility(View.VISIBLE);
-        courseText.setVisibility(View.VISIBLE);
-        gradeText.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.INVISIBLE);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        mRecyclerAdapter = new RecyclerAdapter(coursesAdapter, gradeLettersAdapter, itemCount);
+        recyclerView.setAdapter(mRecyclerAdapter);
+        recyclerView.setItemViewCacheSize(Integer.MAX_VALUE);
+
     }
 
     private void calculateGPA() {
-        long sum = 0, totalCredits = 0, gradeValue, credits = 0;
-        float finalGPA = 0f;
-        boolean canDisplayResult = false;
-        int errorCode = 0;
+        HashMap<Integer, String> courseInputs = mRecyclerAdapter.getCourseInputs();
+        HashMap<Integer, String> gradeInputs = mRecyclerAdapter.getGradeInputs();
+        boolean isError = false;
+        float totalCredits = 0.0f;
+        float sum = 0.0f;
 
-        String inputedGrade,inputedCourse;
+        for(int i = 0; i<mRecyclerAdapter.getItemCount(); i++) {
+            String course = courseInputs.get(i);
+            String grade = gradeInputs.get(i);
 
-        int i = 0;
-        for (; i < recyclerAdapter.getInputSize(); i++) {
-            inputedCourse = recyclerAdapter.getInputedCourse(i);
-            inputedGrade = recyclerAdapter.getInputedGrade(i);
-
-            System.out.println(inputedCourse);
-            System.out.println(inputedGrade);
-
-            if(courseDetails.get(inputedCourse) == null && !TextUtils.isEmpty(inputedCourse)) {
-                errorCode = 1;
-                recyclerAdapter.deleteInputedGradeAndCourse(i);
-                canDisplayResult = false;
+            boolean temp = mCourses.contains(course);
+            if(mCourses.contains(course) && !grade.equals("-")) {
+                System.out.println(course + " " + grade);
+                float credit = mCourseDetails.get(course);
+                float gradeValue = Float.parseFloat(mGradeValues.get(grade));
+                sum = sum + (credit * gradeValue);
+                totalCredits += credit;
+            }
+            else if(!TextUtils.isEmpty(course) && grade.equals("-")) {
+                isError = true;
                 break;
             }
-            if(courseDetails.get(inputedCourse) == null && TextUtils.isEmpty(inputedCourse) && !inputedGrade.equals("-")) {
-                errorCode = 1;
-                recyclerAdapter.deleteInputedGradeAndCourse(i);
-                canDisplayResult = false;
+            else if(!TextUtils.isEmpty(course) && !mCourses.contains(course)) {
+                isError = true;
                 break;
             }
-            if(courseDetails.get(inputedCourse) != null && !TextUtils.isEmpty(inputedCourse) && inputedGrade.equals("-")) {
-                errorCode = 2;
-                canDisplayResult = false;
-                break;
-            }
-
-            if(!TextUtils.isEmpty(inputedCourse) && !inputedGrade.equals("-") && courseDetails.get(inputedCourse) != null) {
-                errorCode = -1;
-                credits = courseDetails.get(inputedCourse);
-                gradeValue = Long.parseLong(gradeValues.get(inputedGrade));
-                canDisplayResult = true;
-
-                sum += credits * gradeValue;
-                totalCredits += credits;
-            }
         }
-        if (totalCredits > 0)
-            finalGPA = (float) sum / totalCredits;
-
-        if (finalGPA > 0.0 && canDisplayResult) {
-            displayAlertMessage(finalGPA);
+        if(isError) {
+            showSnackbar(findViewById(R.id.activity_main), "Please enter a valid grade and course", Snackbar.LENGTH_SHORT);
         }
-        else if(errorCode == 1){
-            showSnackbar(findViewById(R.id.activity_main), "Invalid course", Snackbar.LENGTH_LONG);
+        else {
+            float gpa = sum/totalCredits;
+            System.out.println(gpa);
+            displayGPA(gpa);
         }
-        else if(errorCode == 2) {
-            showSnackbar(findViewById(R.id.activity_main), "Invalid Grade", Snackbar.LENGTH_LONG);
-        }
-        else{
-            showSnackbar(findViewById(R.id.activity_main), "Please input the details for at least one course", Snackbar.LENGTH_LONG);
-        }
-
     }
+
     private void showSnackbar(View view, String message, int duration) {
 
         final Snackbar snackbar = Snackbar.make(view, message, duration);
@@ -257,14 +190,7 @@ public class MainActivity extends AppCompatActivity {
         });
         snackbar.show();
     }
-    private void hideKeyBoard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
-    private void displayAlertMessage(float gpa) {
+    private void displayGPA(float gpa) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater factory = LayoutInflater.from(this);
 
@@ -282,5 +208,58 @@ public class MainActivity extends AppCompatActivity {
         builder.setCancelable(false);
         builder.setPositiveButton("Okay", null);
         builder.show();
+    }
+    private void hideKeyBoard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+    private void showInputNumberOfRowsDialog() {
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.input_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText userInput = promptsView.findViewById(R.id.edit_text);
+
+        // set dialog message
+        alertDialogBuilder
+                .setTitle(R.string.enter_the_number_of_rows)
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // get user input and set it to result
+                                // edit text
+                                int numItems = 0;
+                                try {
+                                    numItems = Integer.parseInt(userInput.getText().toString());
+                                } catch (NumberFormatException e) {
+                                    numItems = Integer.MAX_VALUE;
+                                }
+
+                                initLayout(numItems);
+
+
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 }

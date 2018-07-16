@@ -4,4 +4,11 @@
     <item
         android:id="@+id/about_button"
         android:title="@string/about" />
+    <item
+        android:id="@+id/action_calculate"
+        android:title="Calculate"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_select_number_of_rows"
+        android:title="Number of rows" />
 </menu>

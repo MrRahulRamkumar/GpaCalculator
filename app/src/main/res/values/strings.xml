@@ -4,14 +4,12 @@
     <string name="grade">Grade...</string>
     <string name="course">Course</string>
     <string name="about">About</string>
+    <string name="default_spinner_item">-</string>
+    <string name="icons_made_by">Icons Made By:</string>
+    <string name="freepik">Freepik</string>
+    <string name="twitter">Twitter</string>
+    <string name="flaticon">Flaticon</string>
+    <string name="enter_the_number_of_rows">Enter the number of rows</string>
 
-    <string-array name="grade_letters">
-        <item>A</item>
-        <item>B</item>
-        <item>C</item>
-        <item>D</item>
-        <item>E</item>
-        <item>F</item>
-    </string-array>
 
 </resources>

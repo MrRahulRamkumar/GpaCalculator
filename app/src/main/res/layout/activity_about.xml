@@ -8,7 +8,7 @@
 
     <include
         android:id="@+id/main_toolbar"
-        layout="@layout/main_toolbar"></include>
+        layout="@layout/main_toolbar" />
 
     <TextView
         android:id="@+id/heading_text"
@@ -17,7 +17,7 @@
         android:layout_below="@+id/main_toolbar"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="27dp"
-        android:text="Icons Made By:"
+        android:text="@string/icons_made_by"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="70dp" />
@@ -32,7 +32,7 @@
         android:layout_marginTop="25dp"
         android:background="@android:drawable/screen_background_light_transparent"
         android:backgroundTint="@android:color/transparent"
-        android:text="Freepik"
+        android:text="@string/freepik"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp"
@@ -48,7 +48,7 @@
         android:layout_below="@+id/freepik_button"
         android:background="@android:drawable/screen_background_light_transparent"
         android:backgroundTint="@android:color/transparent"
-        android:text="Twitter"
+        android:text="@string/twitter"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp"
@@ -64,7 +64,7 @@
         android:layout_below="@+id/twitter_button"
         android:background="@android:drawable/screen_background_light_transparent"
         android:backgroundTint="@android:color/transparent"
-        android:text="Flaticon"
+        android:text="@string/flaticon"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="18sp" />
